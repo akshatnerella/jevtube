@@ -60,6 +60,12 @@ function showSaved(text) {
 
 // ---------- rendering ----------
 
+// Grow description boxes to fit their text instead of scrolling.
+function fit(textarea) {
+  textarea.style.height = "auto";
+  textarea.style.height = `${textarea.scrollHeight + 2}px`;
+}
+
 function modeControl(current, onPick) {
   const wrap = document.createElement("div");
   wrap.className = "modes";
@@ -104,6 +110,7 @@ function renderCats() {
     desc.value = cat.description;
     desc.oninput = () => {
       cat.description = desc.value;
+      fit(desc);
       scheduleSave(900);
     };
     li.querySelector(".modes").replaceWith(modeControl(cat.mode, (m) => { cat.mode = m; scheduleSave(0); }));
@@ -113,6 +120,7 @@ function renderCats() {
       scheduleSave(0);
     };
     list.append(li);
+    fit(desc);
   });
   $("count").textContent = `${draft.categories.length} / ${Sloppy.MAX_CATEGORIES}`;
   $("add").disabled = draft.categories.length >= Sloppy.MAX_CATEGORIES;

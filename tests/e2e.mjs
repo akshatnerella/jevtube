@@ -13,7 +13,7 @@ const check = (ok, msg) => {
   if (!ok) failures++;
 };
 
-const browser = await puppeteer.launch({ headless: true, enableExtensions: [EXT], defaultViewport: { width: 1280, height: 900 } });
+const browser = await puppeteer.launch({ headless: true, pipe: true, enableExtensions: [EXT], defaultViewport: { width: 1280, height: 900 } });
 try {
   const sw = await (await browser.waitForTarget((t) => t.type() === "service_worker", { timeout: 10000 })).worker();
   const extId = new URL(sw.url()).host;
