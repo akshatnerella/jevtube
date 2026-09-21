@@ -13,12 +13,12 @@
 </head>
 <body>
 <h1>SloppyYT Privacy Policy</h1>
-<p class="muted">Last updated: September 20, 2026</p>
+<p class="muted">Last updated: September 21, 2026</p>
 
 <p>SloppyYT is a browser extension that labels videos on YouTube (for example "Slop", "Clickbait", "News") so you can decide what to watch. This policy explains exactly what data it handles.</p>
 
 <h2>What the extension sends</h2>
-<p>When you view a YouTube page, the extension reads the <strong>publicly visible text of the video tiles on that page</strong>: video ID, title, channel name and the metadata YouTube shows (view count, upload age, duration). It sends that text, plus a <strong>random install identifier</strong> generated when you install the extension, to the SloppyYT server to get a label for each video.</p>
+<p>When you view a YouTube page, the extension reads the <strong>publicly visible text of the video tiles on that page</strong>: video ID, title, channel name and the metadata YouTube shows (view count, upload age, duration). It sends that text, plus a <strong>random install identifier</strong> generated when you install the extension, to the SloppyYT server to get a label for each video. It also sends the <strong>category names and descriptions</strong> you have set up (for example "True crime: real crimes and investigations"), so videos can be sorted into your categories.</p>
 
 <h2>What it does not collect</h2>
 <ul>
@@ -29,7 +29,7 @@
 </ul>
 
 <h2>How data is used</h2>
-<p>Video text is used only to produce the labels. Labels are cached by video ID (not by user) for up to 14 days so the same public video is not classified twice. The install identifier and your IP address are used only to enforce a daily usage limit and are kept in daily counters that expire within about 25 hours.</p>
+<p>Video text and your category descriptions are used only to produce the labels. Labels are cached by video ID and category set (not by user) for up to 14 days so the same public video is not classified twice. The install identifier and your IP address are used only to enforce a daily usage limit and are kept in daily counters that expire within about 25 hours.</p>
 
 <h2>Service providers</h2>
 <p>Classification runs on Vercel (hosting and AI Gateway) and the Jev model by TypeSafe AI. These providers process the video text only to return labels; per their published terms, the model is not trained on requests.</p>
@@ -38,7 +38,7 @@
 <p>We do not sell or share data with anyone for advertising or any other purpose, and we do not use it to determine creditworthiness or for lending.</p>
 
 <h2>Local storage</h2>
-<p>Your settings and a local cache of labels are stored in your browser's extension storage. Uninstalling the extension deletes them.</p>
+<p>Your settings (including your categories) are stored in your browser's extension sync storage, so they follow you to other browsers where you're signed in. A cache of labels is kept locally. Uninstalling the extension deletes them.</p>
 
 <h2>Contact</h2>
 <p>Questions or deletion requests: use the Support tab on the SloppyYT Chrome Web Store listing.</p>

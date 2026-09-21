@@ -106,7 +106,7 @@
       const vid = tile.dataset.sloppyVid;
       const r = vid === "ad" ? DOM_AD : results.get(vid);
       if (r) paint(tile, r);
-      else markPending(tile);
+      else if (tile.dataset.sloppyState !== "waiting") markPending(tile);
     });
   }
 
@@ -184,7 +184,11 @@
           // doesn't make every tile flash on and off.
           const failed = batch.filter((v) => !results.has(v.id));
           if (failed.length) {
-            failed.forEach((v) => queue.set(v.id, v));
+            failed.forEach((v) => {
+              queue.set(v.id, v);
+              // Drop the dashed "pending" box while we wait; the tile looks normal until labeled.
+              document.querySelectorAll(`[data-sloppy-vid="${v.id}"]`).forEach((t) => (t.dataset.sloppyState = "waiting"));
+            });
             backoff();
           } else {
             retryDelay = 0;
@@ -194,6 +198,7 @@
           if (!alive()) return shutdown();
           lastError = String(e?.message || e);
           if (gen === generation) batch.forEach((v) => queue.set(v.id, v));
+          document.querySelectorAll("[data-sloppy-state='pending']").forEach((t) => (t.dataset.sloppyState = "waiting"));
           backoff();
         })
         .finally(() => {

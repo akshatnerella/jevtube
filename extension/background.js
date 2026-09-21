@@ -91,6 +91,13 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   if (reason === "install") chrome.tabs.create({ url: chrome.runtime.getURL("welcome.html") });
 });
 
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command !== "toggle-sloppy") return;
+  const settings = await Sloppy.load();
+  settings.enabled = !settings.enabled;
+  await Sloppy.save(settings);
+});
+
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg.type === "classify") {
     classify(msg.videos).then(sendResponse);

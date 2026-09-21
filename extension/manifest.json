@@ -47,5 +47,13 @@
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true
+  },
+  "commands": {
+    "toggle-sloppy": {
+      "suggested_key": {
+        "default": "Alt+Shift+S"
+      },
+      "description": "Turn SloppyYT on or off"
+    }
   }
 }

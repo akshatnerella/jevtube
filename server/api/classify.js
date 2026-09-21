@@ -144,7 +144,7 @@ export async function POST(request) {
     return json({ results, remaining: Math.max(0, DAILY_PER_INSTALL - perInstall) });
   } catch (e) {
     console.error("jev failed", e);
-    return json({ results, error: "Classifier temporarily unavailable." }, 502);
+    return json({ results, error: "The labeling service is having a moment. Retrying automatically." }, 502);
   }
 }
 
