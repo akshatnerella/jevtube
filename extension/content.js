@@ -24,6 +24,8 @@
   const results = new Map(); // videoId -> result
   const queue = new Map(); // videoId -> video payload
   let inFlight = 0;
+  let retryDelay = 0; // ms; grows while the backend is failing
+  let retryAt = 0;
   let status = { error: null, classified: 0 };
 
   // ---------- extraction ----------
@@ -135,6 +137,7 @@
   }
 
   function pump() {
+    if (Date.now() < retryAt) return;
     while (queue.size && inFlight < MAX_IN_FLIGHT) {
       const batch = [...queue.values()].slice(0, BATCH_SIZE);
       batch.forEach((v) => queue.delete(v.id));
@@ -148,18 +151,26 @@
             status.classified++;
             document.querySelectorAll(`[data-sloppy-vid="${id}"]`).forEach((t) => paint(t, r));
           }
-          // Failed videos: forget them so the next scan retries.
-          for (const v of batch)
-            if (!results.has(v.id))
-              document.querySelectorAll(`[data-sloppy-vid="${v.id}"]`).forEach((t) => {
-                delete t.dataset.sloppyVid;
-                t.dataset.sloppyState = "error";
-              });
+          // Failed videos stay pending and go back in the queue; retry with backoff so a
+          // backend outage doesn't make every tile flash on and off.
+          const failed = batch.filter((v) => !results.has(v.id));
+          if (failed.length) {
+            failed.forEach((v) => queue.set(v.id, v));
+            retryDelay = Math.min(retryDelay ? retryDelay * 2 : 2000, 60000);
+            retryAt = Date.now() + retryDelay;
+          } else {
+            retryDelay = 0;
+          }
         })
-        .catch((e) => (status.error = String(e)))
+        .catch((e) => {
+          status.error = String(e);
+          batch.forEach((v) => queue.set(v.id, v));
+          retryDelay = Math.min(retryDelay ? retryDelay * 2 : 2000, 60000);
+          retryAt = Date.now() + retryDelay;
+        })
         .finally(() => {
           inFlight--;
-          if (!status.error) pump();
+          pump();
         });
     }
   }

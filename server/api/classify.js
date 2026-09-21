@@ -6,6 +6,7 @@ import { CATEGORY_CRITERIA, PROMPT_VERSION } from "../lib/categories.js";
 import { getResults, setResults, incrementDaily, storeKind } from "../lib/store.js";
 
 const MODEL = gateway.evaluation("typesafe-ai/jev");
+const TYPESAFE_URL = "https://api.typesafe.ai/v1/systemone";
 const MAX_VIDEOS = 12;
 const DAILY_PER_INSTALL = Number(process.env.DAILY_PER_INSTALL || 600);
 const DAILY_PER_IP = Number(process.env.DAILY_PER_IP || 2000);
@@ -51,6 +52,39 @@ function buildQuestions(n) {
   return questions;
 }
 
+// TypeSafe's native API calls yes/no questions "noul" and returns `noul` instead of `probability`.
+async function evaluateDirect({ state, questions }) {
+  const native = Object.fromEntries(
+    Object.entries(questions).map(([k, q]) => [k, q.type === "boolean" ? { ...q, type: "noul" } : q])
+  );
+  const res = await fetch(TYPESAFE_URL, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${process.env.TYPESAFE_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ model: "jev-latest", state, questions: native }),
+  });
+  if (!res.ok) throw new Error(`TypeSafe ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  const { answers } = await res.json();
+  for (const a of Object.values(answers)) if (a.type === "noul") Object.assign(a, { type: "boolean", probability: a.noul });
+  return { answers };
+}
+
+// Jev via the AI Gateway first; when the gateway is saturated (it rate-limits the shared Jev
+// route under load), fall back to TypeSafe's API directly.
+// After a gateway failure, skip it for a minute instead of paying its retry latency every call.
+let gatewayDownUntil = 0;
+async function evaluateJev(args) {
+  const hasDirect = !!process.env.TYPESAFE_API_KEY;
+  if (hasDirect && Date.now() < gatewayDownUntil) return evaluateDirect(args);
+  try {
+    return await evaluate({ model: MODEL, ...args, maxRetries: hasDirect ? 0 : 2 });
+  } catch (e) {
+    if (!hasDirect) throw e;
+    gatewayDownUntil = Date.now() + 60_000;
+    console.warn("gateway failed, using TypeSafe direct:", e.message?.slice(0, 120));
+    return evaluateDirect(args);
+  }
+}
+
 export async function POST(request) {
   let input;
   try {
@@ -77,14 +111,12 @@ export async function POST(request) {
   }
 
   try {
-    const { answers } = await evaluate({
-      model: MODEL,
+    const { answers } = await evaluateJev({
       state: {
         context: "Videos currently shown on a YouTube page. Each has a title, channel and visible metadata text.",
         videos: todo.map(({ title, channel, meta }) => ({ title, channel, meta })),
       },
       questions: buildQuestions(todo.length),
-      maxRetries: 2,
     });
 
     const fresh = [];
