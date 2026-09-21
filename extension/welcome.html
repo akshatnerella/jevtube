@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Welcome to SloppyYT</title>
+<style>
+  :root { --fg: #111; --bg: #fafafa; --card: #fff; --muted: #666; --line: #e5e5e5; }
+  @media (prefers-color-scheme: dark) { :root { --fg: #eee; --bg: #0f0f0f; --card: #1a1a1a; --muted: #9a9a9a; --line: #2c2c2c; } }
+  body { margin: 0; padding: 48px 20px 64px; font: 16px/1.55 system-ui, sans-serif; color: var(--fg); background: var(--bg); }
+  main { max-width: 620px; margin: 0 auto; }
+  h1 { font-size: 32px; margin: 12px 0 4px; letter-spacing: -0.01em; }
+  .lead { color: var(--muted); margin: 0 0 28px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; margin-bottom: 16px; }
+  .cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+  .cat { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; outline: 3px solid var(--c); outline-offset: -3px; }
+  .chip { background: var(--c); color: #fff; font: 600 11px/18px system-ui; padding: 0 7px; border-radius: 4px; }
+  ol { padding-left: 20px; margin: 8px 0 0; } li { margin: 6px 0; }
+  .cta { display: inline-block; margin-top: 8px; background: #e11d48; color: #fff; text-decoration: none; font-weight: 600; padding: 10px 18px; border-radius: 999px; }
+  .muted { color: var(--muted); font-size: 14px; }
+  a { color: inherit; }
+  img { width: 56px; height: 56px; }
+</style>
+</head>
+<body>
+<main>
+  <img src="icons/icon128.png" alt="">
+  <h1>SloppyYT is on.</h1>
+  <p class="lead">Every video on YouTube now gets a colored box telling you what it really is, before you click.</p>
+
+  <div class="card">
+    <strong>What the colors mean</strong>
+    <div class="cats" id="cats" style="margin-top:12px"></div>
+    <p class="muted" style="margin-bottom:0">A <strong>dashed</strong> box means the model isn't sure. <strong>⚡bait</strong> marks a clickbait-style title on an otherwise legit video. Hover a label to see the full breakdown.</p>
+  </div>
+
+  <div class="card">
+    <strong>Make it yours</strong>
+    <ol>
+      <li>Pin SloppyYT: click the puzzle-piece icon in your toolbar, then the pin.</li>
+      <li>Open it on YouTube to see live counts, and set any category to <em>box</em>, <em>dim</em>, <em>hide</em> or <em>off</em>. For example, hide slop and dim clickbait.</li>
+    </ol>
+  </div>
+
+  <a class="cta" href="https://www.youtube.com/">Open YouTube →</a>
+  <p class="muted" style="margin-top:28px">SloppyYT only reads the titles and channel names of the videos shown on youtube.com. No account and no browsing history. <a href="https://sloppyyt.vercel.app/privacy.html" target="_blank">Privacy policy</a></p>
+</main>
+<script src="categories.js"></script>
+<script src="welcome.js"></script>
+</body>
+</html>

@@ -39,32 +39,25 @@ function render() {
 async function refreshStats() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   let stats = null;
-  if (tab?.url?.includes("youtube.com")) {
-    stats = await chrome.tabs.sendMessage(tab.id, { type: "pageStats" }).catch(() => null);
-  }
+  if (tab) stats = await chrome.tabs.sendMessage(tab.id, { type: "pageStats" }).catch(() => null);
   for (const [key, el] of Object.entries(countEls)) el.textContent = stats?.counts?.[key] || "";
   $("pending").textContent = stats
-    ? stats.pending ? `${stats.pending} videos waiting for Jev…` : ""
+    ? stats.pending ? `${stats.pending} videos being labeled…` : ""
     : "Open a YouTube tab to see live counts.";
   const status = await chrome.runtime.sendMessage({ type: "status" });
   $("error").textContent = stats?.error || status.lastError || "";
-  $("keyStatus").textContent = status.hasKey
-    ? `API key loaded (${status.keySource}).`
-    : "No API key yet. Run scripts/sync-key.sh or paste one below.";
 }
 
 $("enabled").onchange = (e) => {
   settings.enabled = e.target.checked;
   save();
 };
-$("saveKey").onclick = async () => {
-  const apiKey = $("apiKey").value.trim();
-  if (apiKey) await chrome.storage.local.set({ apiKey });
-  else await chrome.storage.local.remove("apiKey");
-  $("apiKey").value = "";
+$("clearCache").onclick = async () => {
+  await chrome.runtime.sendMessage({ type: "clearCache" });
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (tab) chrome.tabs.reload(tab.id);
   refreshStats();
 };
-$("clearCache").onclick = () => chrome.runtime.sendMessage({ type: "clearCache" }).then(refreshStats);
 
 loadSettings().then(() => {
   render();

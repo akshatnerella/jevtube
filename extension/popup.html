@@ -16,7 +16,7 @@
   section { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 8px; }
   .muted { color: var(--muted); font-size: 12px; }
   .err { color: #e11d48; font-size: 12px; word-break: break-word; }
-  input[type=password] { width: 100%; box-sizing: border-box; font: inherit; padding: 4px; margin: 4px 0; }
+  .foot { justify-content: space-between; } a { color: var(--muted); font-size: 12px; }
   button { font: inherit; padding: 3px 8px; cursor: pointer; }
 </style>
 </head>
@@ -28,14 +28,11 @@
   <div id="cats"></div>
   <div class="muted" id="pending"></div>
   <div class="err" id="error"></div>
-  <section>
-    <div class="muted" id="keyStatus"></div>
-    <input type="password" id="apiKey" placeholder="TypeSafe API key (optional override)">
-    <div class="row">
-      <button id="saveKey">Save key</button>
-      <button id="clearCache">Clear cache</button>
-    </div>
+  <section class="row foot">
+    <button id="clearCache">Re-check page</button>
+    <a href="https://sloppyyt.vercel.app/privacy.html" target="_blank">Privacy</a>
   </section>
+  <script src="config.js"></script>
   <script src="categories.js"></script>
   <script src="popup.js"></script>
 </body>

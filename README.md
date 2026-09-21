@@ -1,43 +1,38 @@
 # SloppyYT
 
-A Chrome/Brave extension that draws colored boxes around every video on YouTube (home feed, watch-page sidebar, search, shorts shelves, channel grids) and labels it as **Slop, Clickbait, News, Educational, Entertainment, Music, Ad or Other**. It uses [Jev](https://docs.typesafe.ai) by TypeSafe to make the calls.
+A Chrome/Brave extension that draws colored boxes around every video on YouTube (home feed, watch-page sidebar, search, Shorts shelves, channel grids) and labels it as **Slop, Clickbait, News, Educational, Entertainment, Music, Ad or Other**. The labels come from [Jev](https://docs.typesafe.ai), served through the Vercel AI Gateway.
 
-## Setup
+## Layout
+
+```
+extension/   MV3 extension (what ships to the Chrome Web Store). No secrets in here.
+server/      Vercel project: POST /api/classify + privacy page. Holds the AI Gateway key.
+store/       Store listing text, screenshots, promo tile.
+scripts/     package.sh builds dist/sloppyyt-<version>.zip for upload.
+```
+
+```
+content.js (YouTube tab) ──▶ background.js ──▶ https://sloppyyt.vercel.app/api/classify ──▶ AI Gateway ──▶ typesafe-ai/jev
+  finds tiles, paints          local cache,        validates input, shared cache,
+  boxes + labels               install ID          per-install + per-IP daily limits
+```
+
+- **One Jev call per batch.** Up to 12 videos go into `state.videos`. Each video gets a `choice` question (category) and a `boolean` question (is the title clickbait?). The questions are fixed on the server, so the endpoint can't be misused as a general-purpose Jev proxy.
+- **Limits:** 600 new videos per install per day and 2000 per IP (set with the `DAILY_PER_INSTALL` and `DAILY_PER_IP` env vars). Cached videos are free and don't count.
+- **Cache:** results are cached by video ID. Without Redis, the cache and limit counters live in each serverless instance's memory. To make them global, add Upstash Redis from the Vercel Marketplace; the code picks up `KV_REST_API_URL` and `KV_REST_API_TOKEN` automatically.
+- **Ads** are detected from YouTube's own ad markup in the DOM and never reach the API.
+
+## Develop
 
 ```sh
-./scripts/sync-key.sh          # writes extension/config.local.js (gitignored) from API_KEY in .env
+cd server && npm install && npx vercel deploy --prod   # needs AI_GATEWAY_API_KEY set in the Vercel project
+./scripts/package.sh                                   # -> dist/sloppyyt-1.0.0.zip
 ```
 
-1. Open `brave://extensions` (or `chrome://extensions`) and turn on **Developer mode**.
-2. Click **Load unpacked** and select the `extension/` folder.
-3. Open YouTube. Boxes appear within a second or so.
+**Test locally in Brave/Chrome:** open `brave://extensions`, turn on Developer mode, click **Load unpacked** and pick `extension/`. After code changes, click the reload icon on the card.
 
-You can also paste a key into the popup instead of running the script. After changing any code, click the reload icon on the extension card, then refresh YouTube.
+**Change categories:** the wording Jev reads is in `server/lib/categories.js`; labels and colors are in `extension/categories.js`. Keys must match. Bump `PROMPT_VERSION` when you change the criteria so old cached answers aren't reused.
 
-## How it works
+## Publish
 
-```
-content.js (YouTube tab)                 background.js (service worker)            Jev
-─────────────────────────                ──────────────────────────────            ───
-MutationObserver finds tiles ──batch──▶  cache hit? return it
-extract {title, channel, meta}           else ONE request: state.videos[0..n]  ──▶  per video:
-paint box + label        ◀──results───   + per-video questions                ◀──   choice(category)
-                                                                                    noul(clickbait title)
-```
-
-- **One API call per batch.** Up to 12 visible videos go into `state.videos`. Each video gets a `choice` question (its category) and a `noul` question (is the title clickbait?), both pointing at `videos[i]`. Jev answers them all in parallel, in about 300ms.
-- **Code handles rules; Jev handles judgment.** Ads come from YouTube's own ad markup in the DOM and never reach the API.
-- **Confidence drives the display.** Boxes are dashed when the choice confidence is below 0.55. A `⚡bait` chip appears when a non-clickbait video still has a clickbait-style title. Hovering a label shows the top 3 probabilities.
-- **Results are cached** by video id in `chrome.storage.local` for 7 days (up to 5000 videos), so a video is only classified once.
-- **The API key never reaches YouTube's page.** Only the service worker reads it.
-
-## Popup
-
-- Turns the extension on or off.
-- Shows a live count of each category on the current tab.
-- Sets each category to **box**, **dim**, **hide** or **off**. For example, hide slop and dim clickbait.
-- Lets you paste a key and clear the cache.
-
-## Changing categories
-
-Edit `extension/categories.js`. Each `description` is sent to Jev as the Choice criterion, so the description *is* the prompt. Clear the cache from the popup after changing one.
+See `store/LISTING.md` for every field the Chrome Web Store dashboard asks for.

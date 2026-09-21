@@ -2,3 +2,6 @@
 extension/config.local.js
 node_modules/
 .test-profile/
+dist/
+.vercel
+.env*.local

@@ -1,10 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "SloppyYT",
-  "version": "0.1.0",
-  "description": "Real-time YouTube feed sorting with Jev: boxes every video as slop, clickbait, news, ads and more.",
+  "name": "SloppyYT: Spot Slop & Clickbait on YouTube",
+  "short_name": "SloppyYT",
+  "version": "1.0.0",
+  "description": "Color-codes every YouTube video as slop, clickbait, news, educational and more, so you know what it is before you click.",
+  "icons": { "16": "icons/icon16.png", "32": "icons/icon32.png", "48": "icons/icon48.png", "128": "icons/icon128.png" },
   "permissions": ["storage"],
-  "host_permissions": ["https://api.typesafe.ai/*"],
+  "host_permissions": ["https://sloppyyt.vercel.app/*"],
   "background": { "service_worker": "background.js" },
   "content_scripts": [
     {
@@ -14,5 +16,10 @@
       "run_at": "document_idle"
     }
   ],
-  "action": { "default_popup": "popup.html", "default_title": "SloppyYT" }
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "SloppyYT",
+    "default_icon": { "16": "icons/icon16.png", "32": "icons/icon32.png" }
+  },
+  "homepage_url": "https://sloppyyt.vercel.app"
 }
