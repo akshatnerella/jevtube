@@ -1,13 +1,13 @@
 // Service worker: sends visible video tiles to the SloppyYT backend and caches the labels.
 // No API keys live in the extension; the backend holds them and rate-limits per install.
-importScripts("config.js", "categories.js");
+importScripts("config.js", "settings.js");
 
 const CLASSIFY_URL = `${self.SLOPPY_BACKEND}/api/classify`;
 const CACHE_KEY = "classCache";
 const CACHE_MAX = 5000;
 const CACHE_TTL_MS = 7 * 24 * 3600 * 1000;
 
-let cache = null; // videoId -> { category, confidence, probabilities, clickbait, ts }
+let cache = null; // "<categorySetKey>:<videoId>" -> { category, confidence, probabilities, clickbait, ts }
 let lastError = null;
 let limitedUntil = 0; // after a 429, stop calling the backend until this time
 
@@ -39,10 +39,13 @@ function saveCacheSoon() {
 
 async function classify(videos) {
   await loadCache();
+  const settings = await Sloppy.load();
+  const setKey = Sloppy.categorySetKey(settings);
   const results = {};
   const todo = [];
   for (const v of videos) {
-    if (cache[v.id]) results[v.id] = cache[v.id];
+    const hit = cache[`${setKey}:${v.id}`];
+    if (hit) results[v.id] = hit;
     else if (!todo.some((t) => t.id === v.id)) todo.push(v);
   }
   if (!todo.length) return { results };
@@ -52,15 +55,20 @@ async function classify(videos) {
     const res = await fetch(CLASSIFY_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ installId: await getInstallId(), videos: todo }),
+      body: JSON.stringify({
+        installId: await getInstallId(),
+        videos: todo,
+        categories: Sloppy.classifierCategories(settings),
+      }),
     });
     const data = await res.json().catch(() => ({}));
     for (const [id, r] of Object.entries(data.results || {})) {
       const entry = { ...r, ts: Date.now() };
-      cache[id] = entry;
+      cache[`${setKey}:${id}`] = entry;
       results[id] = entry;
     }
     saveCacheSoon();
+    if (typeof data.remaining === "number") chrome.storage.local.set({ remaining: data.remaining });
     if (res.status === 429) {
       lastError = data.error || "Daily limit reached.";
       const midnight = new Date();
@@ -78,7 +86,8 @@ async function classify(videos) {
   }
 }
 
-chrome.runtime.onInstalled.addListener(({ reason }) => {
+chrome.runtime.onInstalled.addListener(async ({ reason }) => {
+  await Sloppy.load(); // migrates v1 settings on update
   if (reason === "install") chrome.tabs.create({ url: chrome.runtime.getURL("welcome.html") });
 });
 
@@ -88,8 +97,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     return true;
   }
   if (msg.type === "status") {
-    sendResponse({ lastError, limited: Date.now() < limitedUntil });
-    return false;
+    chrome.storage.local.get("remaining").then(({ remaining }) =>
+      sendResponse({ lastError, limited: Date.now() < limitedUntil, remaining })
+    );
+    return true;
   }
   if (msg.type === "clearCache") {
     cache = {};

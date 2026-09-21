@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SloppyYT Settings</title>
+<link rel="stylesheet" href="options.css">
+</head>
+<body>
+<main>
+  <header class="top">
+    <img src="icons/icon128.png" alt="" width="40" height="40">
+    <div>
+      <h1>SloppyYT</h1>
+      <p class="muted">Decide what gets boxed, dimmed or hidden on YouTube.</p>
+    </div>
+    <span id="saved" class="saved" aria-live="polite"></span>
+  </header>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>Your categories</h2>
+        <p class="muted">Every video gets sorted into one of these. Describe each one in plain English: the description is exactly what the model reads.</p>
+      </div>
+      <span class="count" id="count"></span>
+    </div>
+
+    <ol id="cats" class="cats"></ol>
+
+    <div class="other-row">
+      <span class="swatch" style="--c:#6b7280"></span>
+      <div class="other-text"><strong>Other</strong><span class="muted">Anything that fits none of your categories</span></div>
+      <div class="modes" id="otherModes"></div>
+    </div>
+
+    <div class="add-row">
+      <button id="add" class="btn primary" type="button">+ Add category</button>
+      <button id="reset" class="btn ghost" type="button">Reset to defaults</button>
+    </div>
+
+    <div id="suggestWrap">
+      <p class="label">Quick add</p>
+      <div id="suggest" class="chips"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Test a title</h2>
+    <p class="muted">Check how a video would be labeled with your current categories.</p>
+    <form id="testForm" class="test">
+      <input id="testTitle" type="text" placeholder="e.g. I Survived 100 Days in Minecraft Hardcore (INSANE)" maxlength="200" required>
+      <input id="testChannel" type="text" placeholder="Channel (optional)" maxlength="100">
+      <button class="btn primary" type="submit">Test</button>
+    </form>
+    <div id="testResult" class="test-result" hidden></div>
+  </section>
+
+  <section class="card">
+    <h2>Display</h2>
+    <label class="toggle"><input type="checkbox" id="enabled"><span>SloppyYT is on</span></label>
+    <label class="toggle"><input type="checkbox" id="showConfidence"><span>Show confidence % on labels</span></label>
+    <label class="toggle"><input type="checkbox" id="showBait"><span>Flag clickbait-style titles with <b>⚡bait</b> on any category</span></label>
+    <div class="slider">
+      <label for="lowConfidence">Draw a dashed "unsure" box below <b id="lowVal"></b> confidence</label>
+      <input type="range" id="lowConfidence" min="0" max="0.9" step="0.05">
+    </div>
+  </section>
+
+  <footer class="muted">
+    <span id="version"></span> · <a href="https://sloppyyt.vercel.app/privacy.html" target="_blank" rel="noopener">Privacy</a>
+    · Category names and descriptions are sent with video titles to label them.
+  </footer>
+</main>
+
+<template id="catTpl">
+  <li class="cat">
+    <div class="cat-top">
+      <label class="swatch-pick" title="Color"><input type="color" class="color"><span class="swatch"></span></label>
+      <input class="name" type="text" maxlength="24" placeholder="Category name" aria-label="Category name">
+      <div class="modes"></div>
+      <button class="icon-btn del" type="button" title="Remove category" aria-label="Remove category">✕</button>
+    </div>
+    <textarea class="desc" rows="2" maxlength="240" placeholder="What belongs here? e.g. 'Videos reacting to other creators with little original content.'" aria-label="Description"></textarea>
+    <p class="err" hidden></p>
+  </li>
+</template>
+
+<script src="config.js"></script>
+<script src="settings.js"></script>
+<script src="options.js"></script>
+</body>
+</html>

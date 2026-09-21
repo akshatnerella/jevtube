@@ -2,7 +2,7 @@
 // The question set is fixed here, so this endpoint can't be used as a general-purpose Jev proxy.
 import { experimental_evaluate as evaluate } from "ai";
 import { gateway } from "@ai-sdk/gateway";
-import { CATEGORY_CRITERIA, PROMPT_VERSION } from "../lib/categories.js";
+import { PROMPT_VERSION, sanitizeCategories, categorySetHash } from "../lib/categories.js";
 import { getResults, setResults, incrementDaily, storeKind } from "../lib/store.js";
 
 const MODEL = gateway.evaluation("typesafe-ai/jev");
@@ -22,23 +22,27 @@ const json = (body, status = 200) =>
 
 const cut = (s, n) => (typeof s === "string" ? s.slice(0, n) : "");
 
-function sanitize(body) {
+export function sanitize(body) {
   if (!body || !INSTALL_ID.test(body.installId || "") || !Array.isArray(body.videos)) return null;
+  const categories = sanitizeCategories(body.categories);
+  if (!categories) return null;
   const videos = body.videos
     .filter((v) => v && VIDEO_ID.test(v.id || "") && typeof v.title === "string" && v.title.trim())
     .slice(0, MAX_VIDEOS)
     .map((v) => ({ id: v.id, title: cut(v.title, 200), channel: cut(v.channel, 100), meta: cut(v.meta, 300) }));
-  return { installId: body.installId, videos };
+  return { installId: body.installId, videos, categories };
 }
 
 // All videos share one state; each gets its own questions pointing at `videos[i]`.
-function buildQuestions(n) {
+// Only the category descriptions come from the client; the question wording is fixed here.
+export function buildQuestions(n, categories) {
+  const criteria = Object.fromEntries(categories.map((c) => [c.id, c.description]));
   const questions = {};
   for (let i = 0; i < n; i++) {
     questions[`cat_${i}`] = {
       type: "choice",
       instructions: `Which category best describes the YouTube video \`videos[${i}]\`, judging from its title, channel and metadata?`,
-      criteria: CATEGORY_CRITERIA,
+      criteria,
     };
     questions[`bait_${i}`] = {
       type: "boolean",
@@ -93,11 +97,14 @@ export async function POST(request) {
     input = null;
   }
   if (!input) return json({ error: "Bad request" }, 400);
-  const { installId, videos } = input;
+  const { installId, videos, categories } = input;
   if (!videos.length) return json({ results: {} });
 
+  // Results are only reusable for the exact same category set.
+  const setHash = categorySetHash(categories);
+  const keyFor = (id) => `res:${PROMPT_VERSION}:${setHash}:${id}`;
   const results = {};
-  const cacheKeys = videos.map((v) => `res:${PROMPT_VERSION}:${v.id}`);
+  const cacheKeys = videos.map((v) => keyFor(v.id));
   const cached = await getResults(cacheKeys);
   const todo = [];
   videos.forEach((v, i) => (cached[i] ? (results[v.id] = cached[i]) : todo.push(v)));
@@ -116,7 +123,7 @@ export async function POST(request) {
         context: "Videos currently shown on a YouTube page. Each has a title, channel and visible metadata text.",
         videos: todo.map(({ title, channel, meta }) => ({ title, channel, meta })),
       },
-      questions: buildQuestions(todo.length),
+      questions: buildQuestions(todo.length, categories),
     });
 
     const fresh = [];
@@ -131,7 +138,7 @@ export async function POST(request) {
         clickbait: answers[`bait_${i}`]?.probability ?? null,
       };
       results[v.id] = r;
-      fresh.push([`res:${PROMPT_VERSION}:${v.id}`, r]);
+      fresh.push([keyFor(v.id), r]);
     });
     await setResults(fresh);
     return json({ results, remaining: Math.max(0, DAILY_PER_INSTALL - perInstall) });

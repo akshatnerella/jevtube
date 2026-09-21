@@ -1,39 +1,48 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <style>
-  :root { color-scheme: light dark; --fg: #111; --bg: #fff; --muted: #666; --line: #e5e5e5; }
-  @media (prefers-color-scheme: dark) { :root { --fg: #eee; --bg: #181818; --muted: #999; --line: #333; } }
-  body { width: 300px; margin: 0; padding: 12px 14px; font: 13px/1.4 system-ui, sans-serif; color: var(--fg); background: var(--bg); }
-  h1 { font-size: 15px; margin: 0; }
-  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .row { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+  :root { --fg: #0f0f0f; --bg: #fff; --muted: #666; --line: #e8e8e8; --chip: #f2f2f2; --accent: #e11d48; color-scheme: light; }
+  @media (prefers-color-scheme: dark) { :root { --fg: #eee; --bg: #181818; --muted: #9a9a9a; --line: #2e2e2e; --chip: #262626; color-scheme: dark; } }
+  * { box-sizing: border-box; }
+  body { width: 320px; margin: 0; padding: 14px; font: 13px/1.4 system-ui, -apple-system, sans-serif; color: var(--fg); background: var(--bg); }
+  header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  header img { width: 26px; height: 26px; }
+  h1 { font-size: 15px; margin: 0; flex: 1; }
+  .switch { position: relative; width: 36px; height: 20px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch span { position: absolute; inset: 0; background: #bbb; border-radius: 99px; cursor: pointer; transition: .15s; }
+  .switch span::before { content: ""; position: absolute; width: 16px; height: 16px; left: 2px; top: 2px; background: #fff; border-radius: 50%; transition: .15s; }
+  .switch input:checked + span { background: var(--accent); }
+  .switch input:checked + span::before { transform: translateX(16px); }
+  .row { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
   .swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
-  .name { flex: 1; }
-  .count { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 20px; text-align: right; }
-  select { font: inherit; padding: 1px 2px; }
-  section { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 8px; }
-  .muted { color: var(--muted); font-size: 12px; }
-  .err { color: #e11d48; font-size: 12px; word-break: break-word; }
-  .foot { justify-content: space-between; } a { color: var(--muted); font-size: 12px; }
-  button { font: inherit; padding: 3px 8px; cursor: pointer; }
+  .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .count { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 22px; text-align: right; }
+  select { font: inherit; padding: 2px 4px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: inherit; }
+  .status { color: var(--muted); font-size: 12px; margin-top: 6px; min-height: 16px; }
+  .err { color: #e11d48; }
+  .off #cats { opacity: .45; }
+  footer { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+  button { font: 600 13px/1 inherit; font-family: inherit; padding: 9px 12px; border-radius: 99px; cursor: pointer; border: 1px solid var(--line); background: var(--chip); color: inherit; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; flex: 1; }
 </style>
 </head>
 <body>
   <header>
+    <img src="icons/icon32.png" alt="">
     <h1>SloppyYT</h1>
-    <label class="row"><input type="checkbox" id="enabled"> on</label>
+    <label class="switch" title="Turn SloppyYT on or off"><input type="checkbox" id="enabled"><span></span></label>
   </header>
   <div id="cats"></div>
-  <div class="muted" id="pending"></div>
-  <div class="err" id="error"></div>
-  <section class="row foot">
-    <button id="clearCache">Re-check page</button>
-    <a href="https://sloppyyt.vercel.app/privacy.html" target="_blank">Privacy</a>
-  </section>
+  <div class="status" id="status"></div>
+  <footer>
+    <button class="primary" id="settings">Edit categories</button>
+    <button id="recheck" title="Clear saved labels and reload this tab">Re-check</button>
+  </footer>
   <script src="config.js"></script>
-  <script src="categories.js"></script>
+  <script src="settings.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

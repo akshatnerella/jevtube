@@ -1,66 +1,66 @@
-const CATS = self.SLOPPY_CATEGORIES;
-const DEFAULTS = self.SLOPPY_DEFAULT_SETTINGS;
 const $ = (id) => document.getElementById(id);
+const MODE_LABELS = { box: "Box", dim: "Dim", hide: "Hide", off: "Off" };
 
 let settings;
-
-async function loadSettings() {
-  const { settings: s } = await chrome.storage.local.get("settings");
-  settings = { ...DEFAULTS, ...s, modes: { ...DEFAULTS.modes, ...s?.modes } };
-}
-
-const save = () => chrome.storage.local.set({ settings });
-
 const countEls = {};
 
 function render() {
   $("enabled").checked = settings.enabled;
-  $("cats").replaceChildren(
-    ...Object.entries(CATS).map(([key, cat]) => {
-      const row = document.createElement("div");
-      row.className = "row";
-      row.innerHTML = `<span class="swatch"></span><span class="name"></span><span class="count"></span>
-        <select><option value="box">box</option><option value="dim">dim</option>
-        <option value="hide">hide</option><option value="off">off</option></select>`;
-      row.querySelector(".swatch").style.background = cat.color;
-      row.querySelector(".name").textContent = cat.label;
-      countEls[key] = row.querySelector(".count");
-      const sel = row.querySelector("select");
-      sel.value = settings.modes[key] || "box";
-      sel.onchange = () => {
-        settings.modes[key] = sel.value;
-        save();
-      };
-      return row;
-    })
-  );
+  document.body.classList.toggle("off", !settings.enabled);
+  const rows = [...settings.categories, { ...Sloppy.OTHER, mode: settings.otherMode }].map((cat) => {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `<span class="swatch"></span><span class="name"></span><span class="count"></span><select></select>`;
+    row.querySelector(".swatch").style.background = cat.color;
+    row.querySelector(".name").textContent = cat.label;
+    row.querySelector(".name").title = cat.description;
+    countEls[cat.id] = row.querySelector(".count");
+    const sel = row.querySelector("select");
+    sel.setAttribute("aria-label", `${cat.label} display`);
+    for (const m of Sloppy.MODES) sel.add(new Option(MODE_LABELS[m], m, false, m === cat.mode));
+    sel.onchange = () => {
+      if (cat.fixed) settings.otherMode = sel.value;
+      else settings.categories.find((c) => c.id === cat.id).mode = sel.value;
+      Sloppy.save(settings);
+    };
+    return row;
+  });
+  $("cats").replaceChildren(...rows);
 }
 
-async function refreshStats() {
+async function refresh() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  let stats = null;
-  if (tab) stats = await chrome.tabs.sendMessage(tab.id, { type: "pageStats" }).catch(() => null);
-  for (const [key, el] of Object.entries(countEls)) el.textContent = stats?.counts?.[key] || "";
-  $("pending").textContent = stats
-    ? stats.pending ? `${stats.pending} videos being labeled…` : ""
-    : "Open a YouTube tab to see live counts.";
-  const status = await chrome.runtime.sendMessage({ type: "status" });
-  $("error").textContent = stats?.error || status.lastError || "";
+  const stats = tab ? await chrome.tabs.sendMessage(tab.id, { type: "pageStats" }).catch(() => null) : null;
+  for (const [id, el] of Object.entries(countEls)) el.textContent = stats?.counts?.[id] || "";
+  const status = await chrome.runtime.sendMessage({ type: "status" }).catch(() => ({}));
+  const err = stats?.error || status?.lastError;
+  const el = $("status");
+  el.classList.toggle("err", !!err);
+  if (err) el.textContent = err;
+  else if (!stats) el.textContent = "Open YouTube to see live counts.";
+  else if (stats.pending) el.textContent = `Labeling ${stats.pending} video${stats.pending === 1 ? "" : "s"}…`;
+  else el.textContent = typeof status?.remaining === "number" && status.remaining < 100
+    ? `${status.remaining} new videos left today` : "";
 }
 
 $("enabled").onchange = (e) => {
   settings.enabled = e.target.checked;
-  save();
+  document.body.classList.toggle("off", !settings.enabled);
+  Sloppy.save(settings);
 };
-$("clearCache").onclick = async () => {
+$("settings").onclick = () => chrome.runtime.openOptionsPage();
+$("recheck").onclick = async () => {
   await chrome.runtime.sendMessage({ type: "clearCache" });
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (tab) chrome.tabs.reload(tab.id);
-  refreshStats();
+  // Only reload tabs where SloppyYT is running (i.e. YouTube).
+  const onYouTube = tab && (await chrome.tabs.sendMessage(tab.id, { type: "pageStats" }).catch(() => null));
+  if (onYouTube) chrome.tabs.reload(tab.id);
+  window.close();
 };
 
-loadSettings().then(() => {
+Sloppy.load().then((s) => {
+  settings = s;
   render();
-  refreshStats();
+  refresh();
+  setInterval(refresh, 1500);
 });
-setInterval(refreshStats, 1500);
