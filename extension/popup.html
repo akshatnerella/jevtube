@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root { color-scheme: light dark; --fg: #111; --bg: #fff; --muted: #666; --line: #e5e5e5; }
+  @media (prefers-color-scheme: dark) { :root { --fg: #eee; --bg: #181818; --muted: #999; --line: #333; } }
+  body { width: 300px; margin: 0; padding: 12px 14px; font: 13px/1.4 system-ui, sans-serif; color: var(--fg); background: var(--bg); }
+  h1 { font-size: 15px; margin: 0; }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .row { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  .name { flex: 1; }
+  .count { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 20px; text-align: right; }
+  select { font: inherit; padding: 1px 2px; }
+  section { border-top: 1px solid var(--line); padding-top: 8px; margin-top: 8px; }
+  .muted { color: var(--muted); font-size: 12px; }
+  .err { color: #e11d48; font-size: 12px; word-break: break-word; }
+  input[type=password] { width: 100%; box-sizing: border-box; font: inherit; padding: 4px; margin: 4px 0; }
+  button { font: inherit; padding: 3px 8px; cursor: pointer; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>SloppyYT</h1>
+    <label class="row"><input type="checkbox" id="enabled"> on</label>
+  </header>
+  <div id="cats"></div>
+  <div class="muted" id="pending"></div>
+  <div class="err" id="error"></div>
+  <section>
+    <div class="muted" id="keyStatus"></div>
+    <input type="password" id="apiKey" placeholder="TypeSafe API key (optional override)">
+    <div class="row">
+      <button id="saveKey">Save key</button>
+      <button id="clearCache">Clear cache</button>
+    </div>
+  </section>
+  <script src="categories.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

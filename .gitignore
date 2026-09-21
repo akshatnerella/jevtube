@@ -1,0 +1,4 @@
+.env
+extension/config.local.js
+node_modules/
+.test-profile/
