@@ -21,6 +21,29 @@ const json = (body, status = 200) =>
   });
 
 const cut = (s, n) => (typeof s === "string" ? s.slice(0, n) : "");
+const num = (n) => (Number.isFinite(n) && n >= 0 ? Math.floor(n) : null);
+
+function formatLength(sec) {
+  if (sec == null) return undefined;
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return h ? `${h}h ${m}m` : m ? `${m}m ${s}s` : `${s}s`;
+}
+
+// What Jev sees for each video. Empty fields are dropped to keep the state compact.
+export function videoState(v) {
+  const out = {
+    title: v.title,
+    channel: v.channel,
+    youtube_category: v.youtubeCategory,
+    description: v.description,
+    tags: v.tags,
+    published: v.published,
+    length: v.live ? "live stream" : formatLength(v.lengthSeconds),
+    views: v.views == null ? undefined : v.views.toLocaleString("en-US"),
+    tile_text: v.meta,
+  };
+  return Object.fromEntries(Object.entries(out).filter(([, x]) => x !== undefined && x !== null && x !== ""));
+}
 
 export function sanitize(body) {
   if (!body || !INSTALL_ID.test(body.installId || "") || !Array.isArray(body.videos)) return null;
@@ -29,7 +52,19 @@ export function sanitize(body) {
   const videos = body.videos
     .filter((v) => v && VIDEO_ID.test(v.id || "") && typeof v.title === "string" && v.title.trim())
     .slice(0, MAX_VIDEOS)
-    .map((v) => ({ id: v.id, title: cut(v.title, 200), channel: cut(v.channel, 100), meta: cut(v.meta, 300) }));
+    .map((v) => ({
+      id: v.id,
+      title: cut(v.title, 200),
+      channel: cut(v.channel, 100),
+      meta: cut(v.meta, 300),
+      description: cut(v.description, 1200),
+      tags: cut(v.tags, 300),
+      youtubeCategory: cut(v.youtubeCategory, 40),
+      published: cut(v.published, 10),
+      lengthSeconds: num(v.lengthSeconds),
+      views: num(v.views),
+      live: v.live === true,
+    }));
   return { installId: body.installId, videos, categories };
 }
 
@@ -41,7 +76,7 @@ export function buildQuestions(n, categories) {
   for (let i = 0; i < n; i++) {
     questions[`cat_${i}`] = {
       type: "choice",
-      instructions: `Which category best describes the YouTube video \`videos[${i}]\`, judging from its title, channel and metadata?`,
+      instructions: `Which category best describes the YouTube video \`videos[${i}]\`, judging from its title, channel, description, tags and other metadata?`,
       criteria,
     };
     questions[`bait_${i}`] = {
@@ -76,7 +111,7 @@ async function evaluateDirect({ state, questions }) {
 // route under load), fall back to TypeSafe's API directly.
 // After a gateway failure, skip it for a minute instead of paying its retry latency every call.
 let gatewayDownUntil = 0;
-async function evaluateJev(args) {
+export async function evaluateJev(args) {
   const hasDirect = !!process.env.TYPESAFE_API_KEY;
   if (hasDirect && Date.now() < gatewayDownUntil) return evaluateDirect(args);
   try {
@@ -120,8 +155,8 @@ export async function POST(request) {
   try {
     const { answers } = await evaluateJev({
       state: {
-        context: "Videos currently shown on a YouTube page. Each has a title, channel and visible metadata text.",
-        videos: todo.map(({ title, channel, meta }) => ({ title, channel, meta })),
+        context: "Videos currently shown on a YouTube page, with each video's title, channel, description, tags, YouTube category and stats.",
+        videos: todo.map(videoState),
       },
       questions: buildQuestions(todo.length, categories),
     });

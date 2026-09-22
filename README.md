@@ -18,6 +18,7 @@ content.js (YouTube tab) ──▶ background.js ──▶ https://sloppyyt.verc
   paints boxes + labels        install ID          shared cache, daily limits
 ```
 
+- **Full context per video.** The content script fetches each uncached video's public record from YouTube's player endpoint (`/youtubei/v1/player`, about 150ms, requested from the page because YouTube returns 403 to the background worker). That record has the description, tags, YouTube category, publish date, length and exact views, and it's sent along with the tile text. `tests/bench.mjs` compares this against tile text only.
 - **One Jev call per batch.** Up to 12 videos go into `state.videos`. Each video gets a `choice` question (category) and a `boolean` question (is the title clickbait?).
 - **Custom categories.** Users edit up to 12 categories on the settings page (`options.html`). Each description is exactly what Jev reads for that option. Settings live in `chrome.storage.sync`. The server takes the category set from the request and validates it (ids, lengths, at most 13, with a fixed `other` the client can't rewrite). The question wording stays fixed on the server, so the endpoint can't be used as a general-purpose Jev proxy. Cache keys include a hash of the category set.
 - **Limits:** 600 new videos per install per day and 2000 per IP (set with the `DAILY_PER_INSTALL` and `DAILY_PER_IP` env vars). Cached videos are free and don't count.

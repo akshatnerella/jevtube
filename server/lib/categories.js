@@ -2,7 +2,7 @@
 // Clients send their own set (user-editable in the extension); these defaults cover old clients.
 import { createHash } from "node:crypto";
 
-export const PROMPT_VERSION = "v2";
+export const PROMPT_VERSION = "v3";
 export const MAX_CATEGORIES = 13; // 12 user categories + "other"
 const ID = /^[a-z0-9_]{1,24}$/;
 const MAX_DESCRIPTION = 240;

@@ -37,6 +37,16 @@ function saveCacheSoon() {
   }, 1000);
 }
 
+// Cached labels for these ids under the current category set (lets the page skip fetching
+// metadata for videos that are already labeled).
+async function lookup(ids) {
+  await loadCache();
+  const setKey = Sloppy.categorySetKey(await Sloppy.load());
+  const results = {};
+  for (const id of ids) if (cache[`${setKey}:${id}`]) results[id] = cache[`${setKey}:${id}`];
+  return { results };
+}
+
 async function classify(videos) {
   await loadCache();
   const settings = await Sloppy.load();
@@ -101,6 +111,10 @@ chrome.commands.onCommand.addListener(async (command) => {
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg.type === "classify") {
     classify(msg.videos).then(sendResponse);
+    return true;
+  }
+  if (msg.type === "lookup") {
+    lookup(msg.ids).then(sendResponse);
     return true;
   }
   if (msg.type === "status") {

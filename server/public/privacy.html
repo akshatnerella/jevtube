@@ -18,7 +18,7 @@
 <p>SloppyYT is a browser extension that labels videos on YouTube (for example "Slop", "Clickbait", "News") so you can decide what to watch. This policy explains exactly what data it handles.</p>
 
 <h2>What the extension sends</h2>
-<p>When you view a YouTube page, the extension reads the <strong>publicly visible text of the video tiles on that page</strong>: video ID, title, channel name and the metadata YouTube shows (view count, upload age, duration). It sends that text, plus a <strong>random install identifier</strong> generated when you install the extension, to the SloppyYT server to get a label for each video. It also sends the <strong>category names and descriptions</strong> you have set up (for example "True crime: real crimes and investigations"), so videos can be sorted into your categories.</p>
+<p>When you view a YouTube page, the extension reads the <strong>publicly visible text of the video tiles on that page</strong>: video ID, title, channel name and the metadata YouTube shows (view count, upload age, duration). For each of those videos it also looks up the video's <strong>public details from YouTube</strong> (description, tags, YouTube category, publish date, length and view count), without sending your YouTube cookies. It sends that text, plus a <strong>random install identifier</strong> generated when you install the extension, to the SloppyYT server to get a label for each video. It also sends the <strong>category names and descriptions</strong> you have set up (for example "True crime: real crimes and investigations"), so videos can be sorted into your categories.</p>
 
 <h2>What it does not collect</h2>
 <ul>
@@ -29,7 +29,7 @@
 </ul>
 
 <h2>How data is used</h2>
-<p>Video text and your category descriptions are used only to produce the labels. Labels are cached by video ID and category set (not by user) for up to 14 days so the same public video is not classified twice. The install identifier and your IP address are used only to enforce a daily usage limit and are kept in daily counters that expire within about 25 hours.</p>
+<p>This public video information and your category descriptions are used only to produce the labels. Labels are cached by video ID and category set (not by user) for up to 14 days so the same public video is not classified twice. The install identifier and your IP address are used only to enforce a daily usage limit and are kept in daily counters that expire within about 25 hours.</p>
 
 <h2>Service providers</h2>
 <p>Classification runs on Vercel (hosting and AI Gateway) and the Jev model by TypeSafe AI. These providers process the video text only to return labels; per their published terms, the model is not trained on requests.</p>

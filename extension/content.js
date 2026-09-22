@@ -61,6 +61,68 @@
     return { id, title, channel, meta: lines.filter((l) => l !== channel).join(" | ") };
   }
 
+  // YouTube's web client version, so metadata requests look like the site's own.
+  let clientVersion; // undefined = not looked yet; "" = not found (background uses its fallback)
+  function getClientVersion() {
+    if (clientVersion === undefined) {
+      clientVersion = "";
+      for (const script of document.scripts) {
+        const m = script.textContent.match(/"INNERTUBE_CLIENT_VERSION":"([\d.]+)"/);
+        if (m) {
+          clientVersion = m[1];
+          break;
+        }
+      }
+    }
+    return clientVersion || null;
+  }
+
+  // Full YouTube record for a video: description, tags, YouTube's own category, publish date,
+  // length and exact views, from the same player endpoint the site uses. Fetched from the page
+  // (YouTube rejects this request from the extension's background). On failure the video still
+  // goes out with its tile text.
+  async function enrich(video) {
+    try {
+      const res = await fetch(`${location.origin}/youtubei/v1/player?prettyPrint=false`, {
+        method: "POST",
+        credentials: "omit",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          videoId: video.id,
+          context: { client: { clientName: "WEB", clientVersion: getClientVersion() || "2.20260918.01.00", hl: "en" } },
+        }),
+        signal: AbortSignal.timeout(3000),
+      });
+      if (!res.ok) return video;
+      const d = await res.json();
+      const v = d.videoDetails || {};
+      const m = d.microformat?.playerMicroformatRenderer || {};
+      if (v.videoId !== video.id) return video;
+      return {
+        ...video,
+        channel: video.channel || v.author || "",
+        description: (v.shortDescription || "").slice(0, 1200),
+        tags: (v.keywords || []).slice(0, 20).join(", ").slice(0, 300),
+        youtubeCategory: m.category || "",
+        published: (m.publishDate || m.uploadDate || "").slice(0, 10),
+        lengthSeconds: Number(v.lengthSeconds) || null,
+        views: Number(v.viewCount) || null,
+        live: !!v.isLiveContent,
+      };
+    } catch {
+      return video;
+    }
+  }
+
+  // Cached labels come back straight away; only the rest get their metadata fetched and classified.
+  async function classifyBatch(batch) {
+    const cached = await chrome.runtime.sendMessage({ type: "lookup", ids: batch.map((v) => v.id) });
+    const todo = batch.filter((v) => !cached?.results?.[v.id]);
+    if (!todo.length) return cached;
+    const resp = await chrome.runtime.sendMessage({ type: "classify", videos: await Promise.all(todo.map(enrich)) });
+    return { ...resp, results: { ...cached?.results, ...resp?.results } };
+  }
+
   // ---------- painting ----------
 
   function styleFor(category) {
@@ -171,8 +233,7 @@
       batch.forEach((v) => queue.delete(v.id));
       const gen = generation;
       inFlight++;
-      chrome.runtime
-        .sendMessage({ type: "classify", videos: batch })
+      classifyBatch(batch)
         .then((resp) => {
           if (gen !== generation) return; // categories changed while this was in flight
           lastError = resp?.error || null;

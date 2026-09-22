@@ -60,7 +60,7 @@ try {
   // Test-a-title preview.
   await opts.type("#testTitle", "The Unsolved Disappearance of Maura Murray");
   await opts.click("#testForm button");
-  await opts.waitForFunction(() => document.querySelector("#testResult .pill"), { timeout: 15000 }).catch(() => {});
+  await opts.waitForFunction(() => document.querySelector("#testResult .pill"), { timeout: 15000, polling: 200 }).catch(() => {});
   const verdict = await opts.$eval("#testResult", (e) => e.textContent).catch(() => "");
   check(/True crime/.test(verdict), `test-a-title labels a true-crime title as True crime (${verdict.slice(0, 40)})`);
   await opts.screenshot({ path: "options.png", fullPage: true });

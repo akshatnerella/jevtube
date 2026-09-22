@@ -106,3 +106,18 @@ test("POST: bad input is a 400", async () => {
   assert.equal((await POST(req({ installId: installId(), videos: [], categories: "x" }))).status, 400);
   assert.equal((await POST(new Request("http://x", { method: "POST", body: "not json" }))).status, 400);
 });
+
+test("POST: enriched metadata is capped and passed to Jev, empty fields dropped", async () => {
+  await POST(req({ installId: installId(), videos: [{
+    id: vid(300), title: "Full context", channel: "c", meta: "1M views",
+    description: "d".repeat(5000), tags: "a, b", youtubeCategory: "Education", published: "2026-09-01",
+    lengthSeconds: 3725, views: 1234567, live: false, junk: "ignored",
+  }, { id: vid(301), title: "Bare", channel: "", meta: "", lengthSeconds: -5, views: "lots" }] }));
+  const [a, b] = typesafeCalls.at(-1).state.videos;
+  assert.equal(a.description.length, 1200);
+  assert.equal(a.youtube_category, "Education");
+  assert.equal(a.length, "1h 2m");
+  assert.equal(a.views, "1,234,567");
+  assert.equal(a.junk, undefined);
+  assert.deepEqual(Object.keys(b), ["title"]);
+});

@@ -53,12 +53,12 @@ Label the videos shown on YouTube pages by content type (slop, clickbait, news, 
 **Permission justifications:**
 - `storage`: saves the user's settings and custom categories (synced across their browsers), a random install ID used for fair-use rate limiting, and a local cache of labels so videos aren't re-checked.
 - Host permission `https://sloppyyt.vercel.app/*`: the extension's own backend, which classifies video titles. No other hosts are contacted.
-- Content script on `youtube.com`: reads the visible titles and channel names of video tiles and draws the labels on the page.
+- Content script on `youtube.com`: reads the visible titles and channel names of video tiles, looks up each video's public details (description, tags, category) from YouTube, and draws the labels on the page.
 
 **Remote code:** No, I am not using remote code. (All JS is in the package; the backend returns JSON labels only.)
 
 **Data usage disclosures** (tick these):
-- "Website content": yes. Video titles, channel names and visible metadata from YouTube pages are sent to the backend to produce labels, together with the user's category names/descriptions.
+- "Website content": yes. Public video details from YouTube (title, channel, description, tags, category, stats) are sent to the backend to produce labels, together with the user's category names/descriptions.
 - Everything else (personally identifiable info, health, financial, authentication, personal communications, location, web history, user activity): **not collected**.
 
 Certify all three: data is not sold to third parties; not used for purposes unrelated to the single purpose; not used for creditworthiness or lending.
