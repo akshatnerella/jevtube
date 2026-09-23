@@ -138,7 +138,7 @@
     tile.dataset.sloppyLow = r.source !== "dom" && r.confidence < settings.lowConfidence ? "1" : "0";
     tile.style.setProperty("--sloppy-color", cat.color);
     const pct = settings.showConfidence && r.source !== "dom" ? ` ${Math.round(r.confidence * 100)}%` : "";
-    const bait = settings.showBait && r.category !== "clickbait" && r.clickbait >= 0.75 ? " ⚡bait" : "";
+    const bait = settings.showBait && r.category !== "clickbait" && r.bait >= 0.75 ? " ⚡bait" : "";
     tile.dataset.sloppyLabel = `${cat.label}${pct}${bait}`;
     if (r.probabilities) {
       const top = Object.entries(r.probabilities)
@@ -146,7 +146,7 @@
         .slice(0, 3)
         .map(([k, p]) => `${styleFor(k).label} ${Math.round(p * 100)}%`)
         .join(" · ");
-      tile.dataset.sloppyTip = top + (r.clickbait != null ? ` · bait title ${Math.round(r.clickbait * 100)}%` : "");
+      tile.dataset.sloppyTip = top + (r.bait != null ? ` · bait title ${Math.round(r.bait * 100)}%` : "");
     } else {
       delete tile.dataset.sloppyTip;
     }

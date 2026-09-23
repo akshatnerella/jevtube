@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "SloppyYT: Spot Slop & Clickbait on YouTube",
   "short_name": "SloppyYT",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Color-codes every YouTube video as slop, clickbait, news or your own categories, so you know what it is before you click.",
   "icons": {
     "16": "icons/icon16.png",
@@ -14,7 +14,7 @@
     "storage"
   ],
   "host_permissions": [
-    "https://sloppyyt.vercel.app/*"
+    "https://jev-backend.vercel.app/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -43,7 +43,7 @@
       "32": "icons/icon32.png"
     }
   },
-  "homepage_url": "https://sloppyyt.vercel.app",
+  "homepage_url": "https://github.com/akshatnerella/sloppyyt",
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true

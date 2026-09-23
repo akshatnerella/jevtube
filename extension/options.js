@@ -196,7 +196,7 @@ async function runTest(e) {
   verdict.innerHTML = `<span class="pill"></span><span></span>`;
   verdict.firstChild.style.setProperty("--c", top.color);
   verdict.firstChild.textContent = top.label;
-  verdict.lastChild.textContent = `${Math.round(r.confidence * 100)}% sure${r.clickbait >= 0.75 ? " · ⚡ clickbait-style title" : ""}`;
+  verdict.lastChild.textContent = `${Math.round(r.confidence * 100)}% sure${r.bait >= 0.75 ? " · ⚡ clickbait-style title" : ""}`;
   const bars = Object.entries(r.probabilities || {})
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)

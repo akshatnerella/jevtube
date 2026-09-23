@@ -7,7 +7,7 @@ await sw.evaluate(() => {
   self.sentVideos = [];
   const realFetch = fetch;
   self.fetch = (url, init) => {
-    if (String(url).includes("/api/classify")) self.sentVideos.push(...JSON.parse(init.body).videos);
+    if (String(url).includes("/classify")) self.sentVideos.push(...JSON.parse(init.body).videos);
     return realFetch(url, init);
   };
 });

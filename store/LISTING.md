@@ -52,7 +52,7 @@ Label the videos shown on YouTube pages by content type (slop, clickbait, news, 
 
 **Permission justifications:**
 - `storage`: saves the user's settings and custom categories (synced across their browsers), a random install ID used for fair-use rate limiting, and a local cache of labels so videos aren't re-checked.
-- Host permission `https://sloppyyt.vercel.app/*`: the extension's own backend, which classifies video titles. No other hosts are contacted.
+- Host permission `https://jev-backend.vercel.app/*`: the extension's own backend, which labels the videos. No other hosts are contacted.
 - Content script on `youtube.com`: reads the visible titles and channel names of video tiles, looks up each video's public details (description, tags, category) from YouTube, and draws the labels on the page.
 
 **Remote code:** No, I am not using remote code. (All JS is in the package; the backend returns JSON labels only.)
@@ -63,9 +63,9 @@ Label the videos shown on YouTube pages by content type (slop, clickbait, news, 
 
 Certify all three: data is not sold to third parties; not used for purposes unrelated to the single purpose; not used for creditworthiness or lending.
 
-**Privacy policy URL:** https://sloppyyt.vercel.app/privacy.html
+**Privacy policy URL:** https://jev-backend.vercel.app/sloppyyt/privacy.html
 
-**Homepage URL:** https://sloppyyt.vercel.app
+**Homepage URL:** https://jev-backend.vercel.app
 
 ## Distribution
 Public, all regions. Brave, Edge, Arc, Opera and Vivaldi users install from the same Chrome Web Store listing.

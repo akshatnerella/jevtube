@@ -1,13 +1,13 @@
-// Service worker: sends visible video tiles to the SloppyYT backend and caches the labels.
+// Service worker: sends visible video tiles to the Jev backend and caches the labels.
 // No API keys live in the extension; the backend holds them and rate-limits per install.
 importScripts("config.js", "settings.js");
 
-const CLASSIFY_URL = `${self.SLOPPY_BACKEND}/api/classify`;
+const CLASSIFY_URL = self.JEV_ENDPOINT;
 const CACHE_KEY = "classCache";
 const CACHE_MAX = 5000;
 const CACHE_TTL_MS = 7 * 24 * 3600 * 1000;
 
-let cache = null; // "<categorySetKey>:<videoId>" -> { category, confidence, probabilities, clickbait, ts }
+let cache = null; // "<categorySetKey>:<videoId>" -> { category, confidence, probabilities, bait, ts }
 let lastError = null;
 let limitedUntil = 0; // after a 429, stop calling the backend until this time
 
