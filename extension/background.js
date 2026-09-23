@@ -41,7 +41,7 @@ function saveCacheSoon() {
 // metadata for videos that are already labeled).
 async function lookup(ids) {
   await loadCache();
-  const setKey = Sloppy.categorySetKey(await Sloppy.load());
+  const setKey = Jev.categorySetKey(await Jev.load());
   const results = {};
   for (const id of ids) if (cache[`${setKey}:${id}`]) results[id] = cache[`${setKey}:${id}`];
   return { results };
@@ -49,8 +49,8 @@ async function lookup(ids) {
 
 async function classify(videos) {
   await loadCache();
-  const settings = await Sloppy.load();
-  const setKey = Sloppy.categorySetKey(settings);
+  const settings = await Jev.load();
+  const setKey = Jev.categorySetKey(settings);
   const results = {};
   const todo = [];
   for (const v of videos) {
@@ -68,7 +68,7 @@ async function classify(videos) {
       body: JSON.stringify({
         installId: await getInstallId(),
         videos: todo,
-        categories: Sloppy.classifierCategories(settings),
+        categories: Jev.classifierCategories(settings),
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -91,21 +91,21 @@ async function classify(videos) {
     }
     return { results, error: lastError };
   } catch (e) {
-    lastError = "Can't reach the SloppyYT server. Retrying shortly.";
+    lastError = "Can't reach the JevTube server. Retrying shortly.";
     return { results, error: lastError };
   }
 }
 
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
-  await Sloppy.load(); // migrates v1 settings on update
+  await Jev.load(); // migrates v1 settings on update
   if (reason === "install") chrome.tabs.create({ url: chrome.runtime.getURL("welcome.html") });
 });
 
 chrome.commands.onCommand.addListener(async (command) => {
-  if (command !== "toggle-sloppy") return;
-  const settings = await Sloppy.load();
+  if (command !== "toggle-jevtube") return;
+  const settings = await Jev.load();
   settings.enabled = !settings.enabled;
-  await Sloppy.save(settings);
+  await Jev.save(settings);
 });
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {

@@ -1,32 +1,32 @@
-[data-sloppy-vid] {
+[data-jt-vid] {
   position: relative;
 }
 
 /* box */
-[data-sloppy-state="done"][data-sloppy-mode="box"],
-[data-sloppy-state="done"][data-sloppy-mode="dim"] {
-  outline: 3px solid var(--sloppy-color) !important;
+[data-jt-state="done"][data-jt-mode="box"],
+[data-jt-state="done"][data-jt-mode="dim"] {
+  outline: 3px solid var(--jt-color) !important;
   outline-offset: 2px;
   border-radius: 12px;
 }
-[data-sloppy-state="done"][data-sloppy-low="1"]:not([data-sloppy-mode="off"]) {
+[data-jt-state="done"][data-jt-low="1"]:not([data-jt-mode="off"]) {
   outline-style: dashed !important;
 }
-[data-sloppy-state="pending"]:not([data-sloppy-mode="off"]) {
+[data-jt-state="pending"]:not([data-jt-mode="off"]) {
   outline: 2px dashed rgba(128, 128, 128, 0.6) !important;
   outline-offset: 2px;
   border-radius: 12px;
 }
 
 /* label */
-[data-sloppy-state="done"]:is([data-sloppy-mode="box"], [data-sloppy-mode="dim"])::after {
-  content: attr(data-sloppy-label);
+[data-jt-state="done"]:is([data-jt-mode="box"], [data-jt-mode="dim"])::after {
+  content: attr(data-jt-label);
   position: absolute;
   top: 6px;
   left: 6px;
   z-index: 50;
   max-width: calc(100% - 12px);
-  background: var(--sloppy-color);
+  background: var(--jt-color);
   color: #fff;
   font: 600 11px/18px Roboto, Arial, sans-serif;
   letter-spacing: 0.02em;
@@ -38,19 +38,19 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-[data-sloppy-state="done"][data-sloppy-tip]:is([data-sloppy-mode="box"], [data-sloppy-mode="dim"]):hover::after {
-  content: attr(data-sloppy-tip);
+[data-jt-state="done"][data-jt-tip]:is([data-jt-mode="box"], [data-jt-mode="dim"]):hover::after {
+  content: attr(data-jt-tip);
   white-space: normal;
 }
 
 /* dim / hide */
-[data-sloppy-state="done"][data-sloppy-mode="dim"] {
+[data-jt-state="done"][data-jt-mode="dim"] {
   opacity: 0.25;
   transition: opacity 0.15s;
 }
-[data-sloppy-state="done"][data-sloppy-mode="dim"]:hover {
+[data-jt-state="done"][data-jt-mode="dim"]:hover {
   opacity: 1;
 }
-[data-sloppy-state="done"][data-sloppy-mode="hide"] {
+[data-jt-state="done"][data-jt-mode="hide"] {
   display: none !important;
 }

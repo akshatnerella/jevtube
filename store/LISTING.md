@@ -1,11 +1,11 @@
 # Chrome Web Store submission kit
 
-Upload `dist/sloppyyt-<version>.zip` (build it with `./scripts/package.sh`) at
+Upload `dist/jevtube-<version>.zip` (build it with `./scripts/package.sh`) at
 https://chrome.google.com/webstore/devconsole, then paste the fields below.
 
 ## Store listing
 
-**Name** (comes from the manifest): SloppyYT: Spot Slop & Clickbait on YouTube
+**Name** (comes from the manifest): JevTube: Spot Slop & Clickbait on YouTube
 
 **Summary** (132 chars max):
 Color-codes every YouTube video as slop, clickbait, news or your own categories, so you know what it is before you click.
@@ -14,7 +14,7 @@ Color-codes every YouTube video as slop, clickbait, news or your own categories,
 
 **Description:**
 
-Tired of AI slop and clickbait taking over your YouTube feed? SloppyYT puts a colored box around every video on YouTube and tells you what it really is, before you waste a click.
+Tired of AI slop and clickbait taking over your YouTube feed? JevTube puts a colored box around every video on YouTube and tells you what it really is, before you waste a click.
 
 WHAT IT LABELS
 • Slop: AI-generated filler, content farms, reuploads, faceless "facts" channels
@@ -29,10 +29,10 @@ WORKS EVERYWHERE ON YOUTUBE
 Home feed, the sidebar while you watch, search results, Shorts shelves and channel pages. Labels appear in about a second as you scroll.
 
 MAKE YOUR OWN CATEGORIES
-Want to spot drama, true crime, reaction videos or finance hype? Add up to 12 categories of your own, describe them in plain English, and SloppyYT sorts your feed by them. Test any title on the settings page to see how it would be labeled.
+Want to spot drama, true crime, reaction videos or finance hype? Add up to 12 categories of your own, describe them in plain English, and JevTube sorts your feed by them. Test any title on the settings page to see how it would be labeled.
 
 YOU'RE IN CONTROL
-Set each category to box, dim, hide or off. Hide slop entirely, dim clickbait, keep everything else visible. A dashed box means the model is unsure, and hovering any label shows the full breakdown. Toggle SloppyYT anywhere with Alt+Shift+S.
+Set each category to box, dim, hide or off. Hide slop entirely, dim clickbait, keep everything else visible. A dashed box means the model is unsure, and hovering any label shows the full breakdown. Toggle JevTube anywhere with Alt+Shift+S.
 
 PRIVATE BY DESIGN
 • No account or sign-in
@@ -63,7 +63,7 @@ Label the videos shown on YouTube pages by content type (slop, clickbait, news, 
 
 Certify all three: data is not sold to third parties; not used for purposes unrelated to the single purpose; not used for creditworthiness or lending.
 
-**Privacy policy URL:** https://jev-backend.vercel.app/sloppyyt/privacy.html
+**Privacy policy URL:** https://jev-backend.vercel.app/jevtube/privacy.html
 
 **Homepage URL:** https://jev-backend.vercel.app
 

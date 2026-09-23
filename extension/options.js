@@ -43,7 +43,7 @@ function scheduleSave(delay = 400) {
 async function saveNow() {
   clearTimeout(saveTimer);
   if (!validate()) return false;
-  const saved = await Sloppy.save(draft);
+  const saved = await Jev.save(draft);
   // Keep ids the normalizer assigned, without clobbering what the user is typing.
   saved.categories.forEach((c, i) => (draft.categories[i].id = c.id));
   showSaved("Saved");
@@ -70,7 +70,7 @@ function modeControl(current, onPick) {
   const wrap = document.createElement("div");
   wrap.className = "modes";
   wrap.setAttribute("role", "group");
-  for (const m of Sloppy.MODES) {
+  for (const m of Jev.MODES) {
     const b = document.createElement("button");
     b.type = "button";
     b.textContent = MODE_LABELS[m];
@@ -122,15 +122,15 @@ function renderCats() {
     list.append(li);
     fit(desc);
   });
-  $("count").textContent = `${draft.categories.length} / ${Sloppy.MAX_CATEGORIES}`;
-  $("add").disabled = draft.categories.length >= Sloppy.MAX_CATEGORIES;
+  $("count").textContent = `${draft.categories.length} / ${Jev.MAX_CATEGORIES}`;
+  $("add").disabled = draft.categories.length >= Jev.MAX_CATEGORIES;
   validate();
 }
 
 function renderSuggestions() {
   const have = new Set(draft.categories.map((c) => c.label.trim().toLowerCase()));
-  const full = draft.categories.length >= Sloppy.MAX_CATEGORIES;
-  const chips = Sloppy.SUGGESTIONS.filter((s) => !have.has(s.label.toLowerCase())).map((s) => {
+  const full = draft.categories.length >= Jev.MAX_CATEGORIES;
+  const chips = Jev.SUGGESTIONS.filter((s) => !have.has(s.label.toLowerCase())).map((s) => {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "chip";
@@ -151,13 +151,13 @@ function renderAll() {
 
 function nextColor() {
   const used = new Set(draft.categories.map((c) => c.color.toLowerCase()));
-  return Sloppy.PALETTE.find((c) => !used.has(c)) || Sloppy.PALETTE[draft.categories.length % Sloppy.PALETTE.length];
+  return Jev.PALETTE.find((c) => !used.has(c)) || Jev.PALETTE[draft.categories.length % Jev.PALETTE.length];
 }
 
 function addCategory(label = "", description = "") {
-  if (draft.categories.length >= Sloppy.MAX_CATEGORIES) return;
+  if (draft.categories.length >= Jev.MAX_CATEGORIES) return;
   const taken = new Set(["other", ...draft.categories.map((c) => c.id)]);
-  draft.categories.push({ id: Sloppy.uniqueId(label || "category", taken), label, description, color: nextColor(), mode: "box" });
+  draft.categories.push({ id: Jev.uniqueId(label || "category", taken), label, description, color: nextColor(), mode: "box" });
   renderAll();
   const last = $("cats").lastElementChild;
   last.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -189,8 +189,8 @@ async function runTest(e) {
     out.textContent = resp?.error || "No answer. Try again in a moment.";
     return;
   }
-  const settings = await Sloppy.load();
-  const top = Sloppy.lookup(settings, r.category);
+  const settings = await Jev.load();
+  const top = Jev.lookup(settings, r.category);
   const verdict = document.createElement("div");
   verdict.className = "verdict";
   verdict.innerHTML = `<span class="pill"></span><span></span>`;
@@ -201,7 +201,7 @@ async function runTest(e) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([k, p]) => {
-      const c = Sloppy.lookup(settings, k);
+      const c = Jev.lookup(settings, k);
       const row = document.createElement("div");
       row.className = "bar";
       row.innerHTML = `<span></span><div class="track"><div class="fill"></div></div><span class="pct"></span>`;
@@ -242,7 +242,7 @@ function wireDisplay() {
 $("add").onclick = () => addCategory();
 $("reset").onclick = () => {
   if (!window.confirm("Replace your categories with the defaults?")) return;
-  draft.categories = Sloppy.clone(Sloppy.DEFAULT_CATEGORIES);
+  draft.categories = Jev.clone(Jev.DEFAULT_CATEGORIES);
   draft.otherMode = "off";
   renderAll();
   renderDisplay();
@@ -252,14 +252,14 @@ $("testForm").onsubmit = runTest;
 $("version").textContent = `v${chrome.runtime.getManifest().version}`;
 
 // Another tab or the popup changed settings: pick it up unless the user is mid-edit here.
-Sloppy.onChange((s) => {
+Jev.onChange((s) => {
   if (document.activeElement?.closest?.(".cat")) return;
   draft = s;
   renderAll();
   renderDisplay();
 });
 
-Sloppy.load().then((s) => {
+Jev.load().then((s) => {
   draft = s;
   renderAll();
   renderDisplay();

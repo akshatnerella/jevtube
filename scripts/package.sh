@@ -1,9 +1,9 @@
 #!/bin/sh
-# Builds the Chrome Web Store upload: dist/sloppyyt-<version>.zip
+# Builds the Chrome Web Store upload: dist/jevtube-<version>.zip
 set -e
 cd "$(dirname "$0")/.."
 VERSION=$(python3 -c "import json;print(json.load(open('extension/manifest.json'))['version'])")
-OUT="dist/sloppyyt-$VERSION.zip"
+OUT="dist/jevtube-$VERSION.zip"
 mkdir -p dist && rm -f "$OUT"
 (cd extension && zip -qr "../$OUT" . -x '.*' -x '*/.*' -x 'config.local.js')
 echo "$OUT"

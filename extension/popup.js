@@ -7,7 +7,7 @@ const countEls = {};
 function render() {
   $("enabled").checked = settings.enabled;
   document.body.classList.toggle("off", !settings.enabled);
-  const rows = [...settings.categories, { ...Sloppy.OTHER, mode: settings.otherMode }].map((cat) => {
+  const rows = [...settings.categories, { ...Jev.OTHER, mode: settings.otherMode }].map((cat) => {
     const row = document.createElement("div");
     row.className = "row";
     row.innerHTML = `<span class="swatch"></span><span class="name"></span><span class="count"></span><select></select>`;
@@ -17,11 +17,11 @@ function render() {
     countEls[cat.id] = row.querySelector(".count");
     const sel = row.querySelector("select");
     sel.setAttribute("aria-label", `${cat.label} display`);
-    for (const m of Sloppy.MODES) sel.add(new Option(MODE_LABELS[m], m, false, m === cat.mode));
+    for (const m of Jev.MODES) sel.add(new Option(MODE_LABELS[m], m, false, m === cat.mode));
     sel.onchange = () => {
       if (cat.fixed) settings.otherMode = sel.value;
       else settings.categories.find((c) => c.id === cat.id).mode = sel.value;
-      Sloppy.save(settings);
+      Jev.save(settings);
     };
     return row;
   });
@@ -46,19 +46,19 @@ async function refresh() {
 $("enabled").onchange = (e) => {
   settings.enabled = e.target.checked;
   document.body.classList.toggle("off", !settings.enabled);
-  Sloppy.save(settings);
+  Jev.save(settings);
 };
 $("settings").onclick = () => chrome.runtime.openOptionsPage();
 $("recheck").onclick = async () => {
   await chrome.runtime.sendMessage({ type: "clearCache" });
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  // Only reload tabs where SloppyYT is running (i.e. YouTube).
+  // Only reload tabs where JevTube is running (i.e. YouTube).
   const onYouTube = tab && (await chrome.tabs.sendMessage(tab.id, { type: "pageStats" }).catch(() => null));
   if (onYouTube) chrome.tabs.reload(tab.id);
   window.close();
 };
 
-Sloppy.load().then((s) => {
+Jev.load().then((s) => {
   settings = s;
   render();
   refresh();

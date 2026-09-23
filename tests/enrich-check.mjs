@@ -15,8 +15,8 @@ const page = await browser.newPage();
 await page.bringToFront();
 const t0 = Date.now();
 await page.goto("https://www.youtube.com/results?search_query=iphone+review", { waitUntil: "domcontentloaded" });
-await page.waitForFunction(() => document.querySelectorAll("[data-sloppy-state=done]").length >= 3, { timeout: 30000, polling: 100 }).catch(async () => {
-  console.log("TIMEOUT states:", await page.evaluate(() => { const o = {}; document.querySelectorAll("[data-sloppy-state]").forEach((t) => (o[t.dataset.sloppyState] = (o[t.dataset.sloppyState] || 0) + 1)); return o; }));
+await page.waitForFunction(() => document.querySelectorAll("[data-jt-state=done]").length >= 3, { timeout: 30000, polling: 100 }).catch(async () => {
+  console.log("TIMEOUT states:", await page.evaluate(() => { const o = {}; document.querySelectorAll("[data-jt-state]").forEach((t) => (o[t.dataset.jtState] = (o[t.dataset.jtState] || 0) + 1)); return o; }));
   console.log("sw lastError:", await sw.evaluate(() => lastError), "sent:", await sw.evaluate(() => self.sentVideos.length));
 });
 console.log(`first 3 labels on screen ${Date.now() - t0}ms after navigation`);

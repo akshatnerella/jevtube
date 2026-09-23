@@ -5,12 +5,12 @@ const browser = await puppeteer.launch({ headless: true, pipe: true, enableExten
 const sw = await (await browser.waitForTarget((t) => t.type() === "service_worker")).worker();
 const id = new URL(sw.url()).host;
 await sw.evaluate(async () => {
-  const s = await Sloppy.load();
+  const s = await Jev.load();
   s.categories.push(
-    { label: "Drama", description: Sloppy.SUGGESTIONS.find((x) => x.label === "Drama").description, color: "#ea580c", mode: "dim" },
-    { label: "True crime", description: Sloppy.SUGGESTIONS.find((x) => x.label === "True crime").description, color: "#0891b2", mode: "box" });
+    { label: "Drama", description: Jev.SUGGESTIONS.find((x) => x.label === "Drama").description, color: "#ea580c", mode: "dim" },
+    { label: "True crime", description: Jev.SUGGESTIONS.find((x) => x.label === "True crime").description, color: "#0891b2", mode: "box" });
   s.categories.find((c) => c.id === "slop").mode = "hide";
-  await Sloppy.save(s);
+  await Jev.save(s);
 });
 const p = await browser.newPage();
 await p.goto(`chrome-extension://${id}/options.html`);

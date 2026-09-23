@@ -151,7 +151,7 @@
     return { ...OTHER, mode: settings.otherMode };
   }
 
-  self.Sloppy = {
+  self.Jev = {
     MAX_CATEGORIES, MAX_LABEL, MAX_DESCRIPTION, MODES, DEFAULT_CATEGORIES, OTHER, SUGGESTIONS, PALETTE,
     DEFAULT_SETTINGS, clone, slug, uniqueId, normalize, load, save, onChange,
     classifierCategories, categorySetKey, lookup,

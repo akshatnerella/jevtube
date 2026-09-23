@@ -69,8 +69,8 @@ try {
   const yt = await browser.newPage();
   await yt.goto("https://www.youtube.com/results?search_query=unsolved+disappearance+true+crime+documentary", { waitUntil: "networkidle2", timeout: 60000 });
   await sleep(9000);
-  const tiles = await yt.evaluate(() => [...document.querySelectorAll("[data-sloppy-vid]")].map((t) => ({
-    state: t.dataset.sloppyState, cat: t.dataset.sloppyCat, mode: t.dataset.sloppyMode, display: getComputedStyle(t).display })));
+  const tiles = await yt.evaluate(() => [...document.querySelectorAll("[data-jt-vid]")].map((t) => ({
+    state: t.dataset.jtState, cat: t.dataset.jtCat, mode: t.dataset.jtMode, display: getComputedStyle(t).display })));
   const done = tiles.filter((t) => t.state === "done");
   console.log("  tiles:", tiles.length, "labeled:", done.length, JSON.stringify(done.reduce((o, t) => ((o[t.cat] = (o[t.cat] || 0) + 1), o), {})));
   check(done.length >= 5, "YouTube tiles get labeled");
@@ -86,7 +86,7 @@ try {
     await chrome.storage.sync.set({ settings });
   });
   await sleep(500);
-  const dimmed = await yt.evaluate(() => [...document.querySelectorAll("[data-sloppy-cat='true_crime']")].every((t) => t.dataset.sloppyMode === "dim"));
+  const dimmed = await yt.evaluate(() => [...document.querySelectorAll("[data-jt-cat='true_crime']")].every((t) => t.dataset.jtMode === "dim"));
   check(dimmed, "mode change applies live to the open YouTube tab");
 
   // --- popup ---
