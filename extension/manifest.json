@@ -43,7 +43,7 @@
       "32": "icons/icon32.png"
     }
   },
-  "homepage_url": "https://github.com/akshatnerella/sloppyyt",
+  "homepage_url": "https://github.com/akshatnerella/jevtube",
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true
