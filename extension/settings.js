@@ -4,7 +4,7 @@
   const MAX_CATEGORIES = 12; // user categories, not counting the fixed "other"
   const MAX_LABEL = 24;
   const MAX_DESCRIPTION = 240;
-  const MODES = ["box", "dim", "hide", "off"];
+  const MODES = ["box", "dim", "blur", "hide", "off"];
 
   // The description is exactly what Jev reads for that option, so it has to stand on its own.
   const DEFAULT_CATEGORIES = [
@@ -20,7 +20,7 @@
       description: "Genuine creator entertainment with an honest title: vlogs, gaming, comedy, podcasts, sports, reviews, commentary." },
     { id: "music", label: "Music", color: "#ec4899", mode: "box",
       description: "Music videos, songs, albums, live performances, DJ mixes, lofi or music playlists." },
-    { id: "ad", label: "Ad", color: "#0d9488", mode: "box",
+    { id: "ad", label: "Ad", color: "#0d9488", mode: "blur",
       description: "Primarily promotes a product, service or brand: sponsored or promoted placements, commercials, product launch promos." },
   ];
 
@@ -52,6 +52,9 @@
     enabled: true,
     showConfidence: true,
     showBait: true,
+    // Blur content the page itself marks as paid (YouTube ad slots, LinkedIn "Promoted" posts)
+    // until the user clicks it, whatever category it lands in.
+    blurSponsored: true,
     lowConfidence: 0.55,
     categories: DEFAULT_CATEGORIES,
     otherMode: "off",
@@ -74,6 +77,7 @@
   function normalize(raw) {
     const s = { ...clone(DEFAULT_SETTINGS), ...(raw || {}) };
     if (!MODES.includes(s.otherMode)) s.otherMode = "off";
+    s.blurSponsored = s.blurSponsored !== false;
     s.lowConfidence = Math.min(0.95, Math.max(0, Number(s.lowConfidence) || 0));
     const taken = new Set(["other"]);
     const cats = Array.isArray(s.categories) ? s.categories : clone(DEFAULT_CATEGORIES);

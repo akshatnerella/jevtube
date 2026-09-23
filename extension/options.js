@@ -1,6 +1,6 @@
 // Settings page: edit categories and display options. Autosaves whenever the draft is valid.
 const $ = (id) => document.getElementById(id);
-const MODE_LABELS = { box: "Box", dim: "Dim", hide: "Hide", off: "Off" };
+const MODE_LABELS = { box: "Box", dim: "Dim", blur: "Blur", hide: "Hide", off: "Off" };
 
 let draft; // working copy of settings; saved to storage when valid
 
@@ -219,6 +219,7 @@ function renderDisplay() {
   $("enabled").checked = draft.enabled;
   $("showConfidence").checked = draft.showConfidence;
   $("showBait").checked = draft.showBait;
+  $("blurSponsored").checked = draft.blurSponsored;
   $("lowConfidence").value = draft.lowConfidence;
   $("lowVal").textContent = `${Math.round(draft.lowConfidence * 100)}%`;
   $("otherModes").replaceWith(
@@ -227,7 +228,7 @@ function renderDisplay() {
 }
 
 function wireDisplay() {
-  for (const key of ["enabled", "showConfidence", "showBait"]) {
+  for (const key of ["enabled", "showConfidence", "showBait", "blurSponsored"]) {
     $(key).onchange = () => { draft[key] = $(key).checked; scheduleSave(0); };
   }
   $("lowConfidence").oninput = () => {

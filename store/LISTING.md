@@ -31,8 +31,11 @@ Home feed, the sidebar while you watch, search results, Shorts shelves and chann
 MAKE YOUR OWN CATEGORIES
 Want to spot drama, true crime, reaction videos or finance hype? Add up to 12 categories of your own, describe them in plain English, and JevTube sorts your feed by them. Test any title on the settings page to see how it would be labeled.
 
+LOCK IN
+Ads and sponsored videos are blurred behind a "click to show" cover, so they don't pull your attention. One click reveals one.
+
 YOU'RE IN CONTROL
-Set each category to box, dim, hide or off. Hide slop entirely, dim clickbait, keep everything else visible. A dashed box means the model is unsure, and hovering any label shows the full breakdown. Toggle JevTube anywhere with Alt+Shift+S.
+Set each category to box, dim, blur, hide or off. Hide slop entirely, dim clickbait, keep everything else visible. A dashed box means the model is unsure, and hovering any label shows the full breakdown. Toggle JevTube anywhere with Alt+Shift+S.
 
 PRIVATE BY DESIGN
 • No account or sign-in

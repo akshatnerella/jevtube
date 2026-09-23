@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "JevTube: Spot Slop & Clickbait on YouTube",
   "short_name": "JevTube",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Color-codes every YouTube video as slop, clickbait, news or your own categories, so you know what it is before you click.",
   "icons": {
     "16": "icons/icon16.png",

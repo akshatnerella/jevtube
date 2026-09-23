@@ -25,6 +25,11 @@ try {
   await opts.goto(`chrome-extension://${extId}/options.html`);
   await opts.waitForSelector(".cat");
   check((await opts.$$(".cat")).length === 7, "7 default categories on the settings page");
+  check(await opts.evaluate(() => {
+    const ad = [...document.querySelectorAll(".cat")].find((li) => li.querySelector(".name").value === "Ad");
+    return ad.querySelector('.modes button[aria-pressed="true"]').textContent === "Blur";
+  }), "Ad category defaults to Blur");
+  check(await opts.$eval("#blurSponsored", (e) => e.checked), "'Blur ads' is on by default");
 
   const chip = await opts.waitForSelector("xpath/.//button[contains(., 'True crime')]");
   await chip.click();
@@ -88,6 +93,32 @@ try {
   await sleep(500);
   const dimmed = await yt.evaluate(() => [...document.querySelectorAll("[data-jt-cat='true_crime']")].every((t) => t.dataset.jtMode === "dim"));
   check(dimmed, "mode change applies live to the open YouTube tab");
+
+  // --- Blur: any category can be blurred; a click reveals instead of opening the video ---
+  await sw.evaluate(async () => {
+    const settings = await Jev.load();
+    settings.categories.find((c) => c.id === "true_crime").mode = "blur";
+    await Jev.save(settings);
+  });
+  await sleep(500);
+  const blurState = () => yt.evaluate(() => {
+    const el = document.querySelector("[data-jt-cat='true_crime']");
+    el.scrollIntoView({ block: "center" });
+    const r = el.getBoundingClientRect();
+    return { mode: el.dataset.jtMode, revealed: !!el.dataset.jtRevealed, cover: getComputedStyle(el, "::before").content,
+      blur: getComputedStyle(el, "::before").backdropFilter, x: r.left + r.width / 2, y: r.top + r.height / 2, url: location.href };
+  });
+  const before = await blurState();
+  check(before.mode === "blur" && before.cover.includes("click to show") && before.blur.includes("blur"), `blurred category is covered (${before.cover})`);
+  await yt.mouse.click(before.x, before.y);
+  await sleep(600);
+  const after = await blurState();
+  check(after.revealed && after.url === before.url, "clicking a blurred video reveals it instead of opening it");
+
+  // Real YouTube ads show up only sometimes; when one is on the page it must be blurred.
+  const ads = await yt.evaluate(() => [...document.querySelectorAll("[data-jt-vid='ad']")].map((el) => el.dataset.jtMode));
+  if (ads.length) check(ads.every((m) => m === "blur"), `YouTube ad slots are blurred (${ads.length} on page)`);
+  else console.log("  (no YouTube ad on this page this run; ad blur covered by settings check below)");
 
   // --- popup ---
   const popup = await browser.newPage();

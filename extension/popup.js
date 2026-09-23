@@ -1,5 +1,5 @@
 const $ = (id) => document.getElementById(id);
-const MODE_LABELS = { box: "Box", dim: "Dim", hide: "Hide", off: "Off" };
+const MODE_LABELS = { box: "Box", dim: "Dim", blur: "Blur", hide: "Hide", off: "Off" };
 
 let settings;
 const countEls = {};

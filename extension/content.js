@@ -130,11 +130,20 @@
     return Jev.lookup(settings, category);
   }
 
+  // YouTube's own ad markup is certain, so those are blurred whatever their category says
+  // (unless the user hides that category outright).
+  function modeFor(cat, sponsored) {
+    if (!settings.enabled) return "off";
+    if (sponsored && settings.blurSponsored && cat.mode !== "hide") return "blur";
+    return cat.mode;
+  }
+
   function paint(tile, r) {
     const cat = styleFor(r.category);
     tile.dataset.jtState = "done";
     tile.dataset.jtCat = r.category;
-    tile.dataset.jtMode = settings.enabled ? cat.mode : "off";
+    tile.dataset.jtMode = modeFor(cat, r.source === "dom");
+    tile.dataset.jtCover = r.source === "dom" ? "Sponsored · click to show" : `${cat.label} · click to show`;
     tile.dataset.jtLow = r.source !== "dom" && r.confidence < settings.lowConfidence ? "1" : "0";
     tile.style.setProperty("--jt-color", cat.color);
     const pct = settings.showConfidence && r.source !== "dom" ? ` ${Math.round(r.confidence * 100)}%` : "";
@@ -158,7 +167,7 @@
   }
 
   function clearTile(tile) {
-    for (const k of ["jtState", "jtCat", "jtMode", "jtLow", "jtLabel", "jtTip", "jtVid"])
+    for (const k of ["jtState", "jtCat", "jtMode", "jtLow", "jtLabel", "jtTip", "jtVid", "jtCover", "jtRevealed"])
       delete tile.dataset[k];
     tile.style.removeProperty("--jt-color");
   }
@@ -322,6 +331,15 @@
   });
 
   Jev.onChange((s) => alive() && applySettings(s));
+
+  // A click on a blurred tile reveals it instead of opening the video.
+  addEventListener("click", (e) => {
+    const tile = e.target.closest?.('[data-jt-mode="blur"]:not([data-jt-revealed])');
+    if (!tile) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    tile.dataset.jtRevealed = "1";
+  }, true);
 
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg.type === "pageStats") {
